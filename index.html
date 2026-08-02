@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Engine — Imagine to Application Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          animation: {
+            'orb-slow': 'orb 10s ease-in-out infinite',
+            'orb-fast': 'orb 6s ease-in-out infinite',
+            'shimmer-fast': 'shimmer 1.5s infinite linear',
+            'border-flow': 'border-flow 3s infinite linear',
+          },
+          keyframes: {
+            orb: {
+              '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+            'border-flow': {
+              '0%': { backgroundPosition: '0% 50%' },
+              '100%': { backgroundPosition: '100% 50%' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #010409;
+      overflow-x: hidden;
+    }
+    
+    /* Background Ambient Grid + Noise */
+    .bg-main {
+      background-image: 
+        linear-gradient(to bottom, #010409, #050914),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3%3Cfilter id='noiseFilter'%3%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3%3C/filter%3%3%3Crect width='100%' height='100%' filter='url(%23noiseFilter)'/%3%3C/svg%3%3E");
+      background-blend-mode: overlay;
+      opacity: 0.15;
+    }
+
+    /* Moving Decorative Orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.35;
+    }
+
+    .glass-panel {
+      background: rgba(13, 21, 38, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    .glass-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 1px; /* Border thickness */
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(99, 102, 241, 0.2) 50%, rgba(255, 255, 255, 0.05));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Multicolor Focus Signature Borders */
+    .multiborder {
+      position: relative;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .focus-signature:focus-within .multiborder::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 14px;
+      padding: 2px;
+      background: linear-gradient(135deg, #f0abfc, #6366f1 50%, #facc15);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: border-flow 3s infinite linear;
+      background-size: 200% auto;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen font-sans antialiased flex flex-col justify-between selection:bg-fuchsia-600 selection:text-white">
+
+  <!-- Ambient Environment (Moving Decorative Orbs) -->
+  <div class="bg-main fixed inset-0 z-0"></div>
+  <div class="orb w-96 h-96 bg-indigo-900/60 top-[-20%] left-[10%] animate-orb-slow"></div>
+  <div class="orb w-80 h-80 bg-violet-900/50 bottom-[10%] right-[10%] animate-orb-fast" style="animation-delay: -2s;"></div>
+  <div class="orb w-64 h-64 bg-fuchsia-900/40 top-[40%] left-[30%] animate-orb-slow" style="animation-delay: -5s;"></div>
+
+  <!-- Main Container -->
+  <main class="relative z-10 max-w-5xl mx-auto px-4 py-16 w-full flex-grow flex flex-col justify-center gap-12">
+    
+    <!-- Sophisticated Header -->
+    <header class="text-center space-y-6">
+      <div class="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold uppercase tracking-widest text-emerald-400 shadow-inner glow-green">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        AI-Programmatic Production Studio
+      </div>
+      <h1 class="text-5xl md:text-6xl font-black tracking-tighter leading-tight max-w-3xl mx-auto">
+        Your Ideas, <span class="bg-gradient-to-r from-fuchsia-400 via-indigo-400 to-amber-300 bg-clip-text text-transparent">Immediately Applied</span> and Deployed
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto font-light leading-relaxed">
+        NexusLink transforms natural language blueprints into live, edge-hosted web applications via OpenAI and the Vercel REST API.
+      </p>
+    </header>
+
+    <!-- Aura Card -->
+    <div id="aura-card" class="glass-panel rounded-3xl p-6 sm:p-10 transition-all duration-700 ease-in-out">
+      
+      <form id="gen-form" class="space-y-8">
+        
+        <!-- Slug Line Input -->
+        <div class="space-y-2 focus-signature group">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 group-focus-within:text-fuchsia-400 transition-colors">
+            Static URL Signature (Slug)
+          </label>
+          <div class="multiborder relative flex items-center">
+            <span class="absolute left-4 text-slate-600 font-mono text-sm select-none">https://</span>
+            <input 
+              type="text" 
+              id="slug" 
+              placeholder="my-cool-app" 
+              required 
+              class="w-full bg-slate-950/70 border border-slate-800 rounded-xl pl-20 pr-32 py-4 text-slate-100 font-mono text-sm placeholder-slate-600 focus:outline-none focus:border-fuchsia-500 transition-all"
+            />
+            <span class="absolute right-4 text-slate-600 font-mono text-sm select-none">.vercel.app</span>
+          </div>
+        </div>
+
+        <!-- Prompt Textarea & Idea Lab -->
+        <div class="space-y-3 focus-signature group">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 group-focus-within:text-amber-400 transition-colors">
+            Application Blueprint Input
+          </label>
+          
+          <div class="multiborder relative">
+            <textarea 
+              id="prompt" 
+              rows="6" 
+              placeholder="e.g. Build an interactive interactive SaaS pricing table with a monthly/yearly billing toggle." 
+              required 
+              class="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-5 text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-all resize-none custom-scrollbar"
+            ></textarea>
+          </div>
+
+          <!-- Multicolor Preset Lab -->
+          <div class="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
+            <span class="text-slate-500 font-medium">Idea Lab:</span>
+            <button type="button" onclick="loadSample(1)" class="bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 px-3 py-1.5 rounded-lg transition-all">⏱️ Glass Pomodoro</button>
+            <button type="button" onclick="loadSample(2)" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800 px-3 py-1.5 rounded-lg transition-all">📊 Pricing Matrix</button>
+            <button type="button" onclick="loadSample(3)" class="bg-fuchsia-950/60 hover:bg-fuchsia-900 text-fuchsia-300 border border-fuchsia-800 px-3 py-1.5 rounded-lg transition-all">📋 Kanban Board</button>
+          </div>
+        </div>
+
+        <!-- Synthesize Button -->
+        <button 
+          type="submit" 
+          id="submit-btn"
+          class="w-full bg-gradient-to-r from-fuchsia-600 via-indigo-600 to-amber-500 hover:from-fuchsia-500 hover:to-amber-400 text-white font-bold py-5 rounded-2xl transition-all duration-200 shadow-2xl flex justify-center items-center gap-4 active:scale-[0.99] group overflow-hidden"
+        >
+          <span id="btn-text" class="tracking-wide text-sm font-semibold group-hover:scale-105 transition-transform">Synthesize & Deploy Live Link</span>
+        </button>
+      </form>
+
+      <!-- State-Aware Output Timeline (The "No Same Blue" part) -->
+      <div id="result-timeline" class="hidden mt-10 pt-10 border-t border-slate-800/80 space-y-8 max-w-lg mx-auto">
+        
+        <h3 class="text-sm font-bold uppercase text-center tracking-widest text-indigo-400">Deployment State Lab</h3>
+
+        <!-- Phase 1: AI Synthesis -->
+        <div class="flex items-center gap-4 text-sm">
+          <div class="w-12 h-12 rounded-xl bg-amber-600/10 border-2 border-amber-500/20 text-amber-300 flex items-center justify-center font-bold shadow-xl">01</div>
+          <div class="flex-grow space-y-1">
+            <p class="font-semibold text-white">AI App Synthesis</p>
+            <p class="text-slate-400 text-xs">Transforming blueprint prompt into single-file application code via GPT-4o.</p>
+          </div>
+          <span id="state-01" class="text-amber-400 animate-pulse">Running</span>
+        </div>
+
+        <!-- Phase 2: Vercel Rest -->
+        <div class="flex items-center gap-4 text-sm">
+          <div class="w-12 h-12 rounded-xl bg-indigo-600/10 border-2 border-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold shadow-xl">02</div>
+          <div class="flex-grow space-y-1">
+            <p class="font-semibold text-slate-300">Edge Compilation</p>
+            <p class="text-slate-400 text-xs">Packing files and deploying to Vercel global edge network via API.</p>
+          </div>
+          <span id="state-02" class="text-slate-600">Queued</span>
+        </div>
+
+        <!-- Phase 3: Final Link -->
+        <div id="final-state" class="p-6 bg-slate-950 border border-fuchsia-500/30 rounded-2xl space-y-4 shadow-2xl opacity-50">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400"></span>
+            <span class="text-xs font-bold text-fuchsia-400 uppercase tracking-wider">03 • Published Live App Link</span>
+          </div>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-slate-900 border border-slate-800 rounded-xl p-4 gap-3">
+            <a id="live-url" href="#" target="_blank" class="truncate font-mono text-sm text-fuchsia-400 hover:underline">Waiting...</a>
+            <div class="flex items-center gap-2 shrink-0">
+              <button id="copy-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-xl border border-slate-800 transition-all flex items-center justify-center gap-2">
+                <span id="copy-text">Copy Link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="text-center py-6 text-xs text-slate-700 font-mono relative z-10">
+    Aura Engine Studio • Programmatic Application Synthesis
+  </footer>
+
+  <script>
+    const form = document.getElementById('gen-form');
+    const auraCard = document.getElementById('aura-card');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const timeline = document.getElementById('result-timeline');
+    const finalState = document.getElementById('final-state');
+    const s1Status = document.getElementById('state-01');
+    const s2Status = document.getElementById('state-02');
+    const liveUrlAnchor = document.getElementById('live-url');
+    const copyBtn = document.getElementById('copy-btn');
+    const copyText = document.getElementById('copy-text');
+
+    function loadSample(type) {
+      const slugInput = document.getElementById('slug');
+      const promptInput = document.getElementById('prompt');
+      const rand = Math.floor(Math.random() * 8999 + 1000);
+      slugInput.focus();
+
+      if (type === 1) {
+        slugInput.value = `timer-aura-${rand}`;
+        promptInput.value = 'Build a beautiful glassmorphism Pomodoro focus timer with multiple color themes, task session history, custom interval settings, sound alerts, and smooth animated timers.';
+      } else if (type === 2) {
+        slugInput.value = `saas-prices-${rand}`;
+        promptInput.value = 'Create a clean, eye-catching SaaS pricing matrix with monthly/yearly billing toggle switch, interactive comparison tool, recommended populaire badge, and an order modal form.';
+      } else if (type === 3) {
+        slugInput.value = `kanban-lab-${rand}`;
+        promptInput.value = 'Build an interactive interactive Kanban board for task management with drag-and-drop animations, multi-color task priority labels, local storage persistence, and dynamic filters.';
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const slug = document.getElementById('slug').value.trim();
+      const prompt = document.getElementById('prompt').value.trim();
+
+      // UI State Transition: Collapse Form, Show Timeline
+      submitBtn.disabled = true;
+      btnText.textContent = 'Synthesis Request Transmitted...';
+      auraCard.classList.add('p-6', 'sm:p-8');
+      form.classList.add('opacity-10', 'pointer-events-none');
+      timeline.classList.remove('hidden');
+      s1Status.textContent = "Running";
+      s1Status.classList.add('animate-pulse');
+
+      try {
+        const res = await fetch('/api/v1/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, project_slug: slug })
+        });
+
+        // Stage 1 -> Stage 2 transition
+        s1Status.textContent = "Success";
+        s1Status.classList.remove('animate-pulse');
+        s1Status.classList.add('text-emerald-400');
+        s2Status.textContent = "Running";
+        s2Status.classList.add('animate-pulse', 'text-indigo-400');
+
+        const data = await res.json();
+
+        if (res.ok && data.live_url) {
+          // Stage 2 -> Final success
+          s2Status.textContent = "Success";
+          s2Status.classList.remove('animate-pulse');
+          s2Status.classList.add('text-emerald-400');
+
+          liveUrlAnchor.href = data.live_url;
+          liveUrlAnchor.textContent = data.live_url;
+          finalState.classList.remove('opacity-50');
+        } else {
+          alert(`Application Synthesis Failure: ${data.detail || 'Internal AI Error.'}`);
+          s1Status.textContent = "Error"; s1Status.classList.add('text-rose-500');
+          s2Status.textContent = "Halted"; s2Status.classList.add('text-rose-500');
+        }
+      } catch (err) {
+        alert('Transmission Failure. Is the Python engine running?');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Synthesize & Deploy Live Link';
+        // (Do not reset form visibility here to keep timeline focused)
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(liveUrlAnchor.href);
+      copyText.textContent = 'Copied!';
+      setTimeout(() => copyText.textContent = 'Copy Link', 2000);
+    });
+  </script>
+</body>
+</html>
